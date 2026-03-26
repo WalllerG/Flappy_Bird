@@ -6,6 +6,8 @@ pygame.init()
 screen = pygame.display.set_mode((800, 800))
 pygame.display.set_caption("Flappy Bird")
 clock = pygame.time.Clock()
+scroll = 0
+scroll_speed = 2
 bird_pos = 300
 bird_velocity = 0
 gravity = 0.2
@@ -48,8 +50,9 @@ game_over = pygame.font.Font('game_font.ttf', 80)
 game_over_text = game_over.render("GAME OVER", True, (245, 160, 80))
 game_over_rect = game_over_text.get_rect(center=(400, 230))
 
-def draw_starting_page():
-    screen.blit(background, (0, 0))
+def draw_starting_page(pos):
+    screen.blit(background, (pos, 0))
+    screen.blit(background, (pos + background.get_width(), 0))
     for ox, oy in [(-3, -3), (3, -3), (-3, 3), (3, 3), (0, -3), (0, 3), (-3, 0), (3, 0)]:
         screen.blit(starting_page_outline, (starting_page_rect.topleft[0] + ox, starting_page_rect.topleft[1] + oy))
     screen.blit(starting_page_surf, starting_page_rect)
@@ -145,7 +148,10 @@ while running:
                 if start_game.collidepoint(event.pos):
                     game_active = True
     if not game_active:
-        start_game = draw_starting_page()
+        scroll -= scroll_speed
+        if abs(scroll) > background.get_width():
+            scroll = 0
+        start_game = draw_starting_page(scroll)
     if game_active:
         draw_background()
         br = draw_bird(bird_pos)
