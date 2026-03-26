@@ -10,7 +10,7 @@ bird_pos = 300
 bird_velocity = 0
 gravity = 0.2
 jump_strength = -3.5
-GAP_SIZE = 150
+GAP_SIZE = 130
 tunnel_pos1 = 700
 tunnel_pos2 = 1000
 tunnel_pos3 = 1300
@@ -19,6 +19,14 @@ gap1 = random.randint(200, 400)
 gap2 = random.randint(200, 400)
 gap3 = random.randint(200, 400)
 gap4 = random.randint(200, 400)
+COLOR_SHADOW = (180, 100, 40)
+COLOR_OUTLINE = (255, 255, 255)
+score = 0
+pass1 = False
+pass2 = False
+pass3 = False
+pass4 = False
+restart_button = None
 
 background = pygame.transform.scale(pygame.image.load("images/background.png"), screen.get_size())
 
@@ -28,9 +36,11 @@ bird = pygame.transform.scale(bird_surface, (60,60))
 top_tunnel_img = pygame.image.load("images/tunnel1.png").convert_alpha()
 bot_tunnel_img = pygame.image.load("images/tunnel2.png").convert_alpha()
 
-game_over = pygame.font.SysFont("comicsansms", 50)
-game_over_text = game_over.render("GAME OVER", True, 'Red')
-game_over_rect = game_over_text.get_rect(center = (400 ,400))
+score_surf = pygame.font.Font('score_font.ttf', 66)
+
+game_over = pygame.font.Font('game_font.ttf', 80)
+game_over_text = game_over.render("GAME OVER", True, (245, 160, 80))
+game_over_rect = game_over_text.get_rect(center=(400, 230))
 
 def draw_background():
     screen.blit(background, (0,0))
@@ -47,14 +57,39 @@ def draw_tunnels(x_pos, gap_y):
     scaled_top = pygame.transform.scale(top_tunnel_img, (100, top_height))
     scaled_bottom = pygame.transform.scale(bot_tunnel_img, (100, bottom_height))
     top_rect = scaled_top.get_rect(topleft=(x_pos, 0))
-    bottom_rect = scaled_bottom.get_rect(bottomleft=(x_pos, 630))
+    bottom_rect = scaled_bottom.get_rect(bottomleft=(x_pos, 625))
     screen.blit(scaled_top, top_rect)
     screen.blit(scaled_bottom, bottom_rect)
-
     return top_rect, bottom_rect
 
 def draw_game_over():
+    screen.fill('LightGreen')
+    outline_surf = game_over.render("GAME OVER", True, COLOR_OUTLINE)
+    for ox, oy in [(-2, -2), (2, -2), (-2, 2), (2, 2), (0, -2), (0, 2), (-2, 0), (2, 0)]:
+        screen.blit(outline_surf, (game_over_rect.topleft[0] + ox, game_over_rect.topleft[1] + oy))
+    shadow_surf = game_over.render("GAME OVER", True, COLOR_SHADOW)
+    screen.blit(shadow_surf, (game_over_rect.topleft[0], game_over_rect.topleft[1] + 4))
     screen.blit(game_over_text, game_over_rect)
+    score_text = game_over.render(f"SCORE: {score}", True, 'White')
+    score_rect = score_text.get_rect(topleft=(game_over_rect.topleft[0] + 30, game_over_rect.topleft[1] + 120))
+    screen.blit(score_text, score_rect)
+    restart_font = pygame.font.Font('score_font.ttf', 40)
+    restart_text = restart_font.render("RESTART", True, 'White')
+    restart_rect = restart_text.get_rect(center=(game_over_rect.centerx, game_over_rect.centery + 220))
+    restart_frame_rect = restart_rect.inflate(10, 10)
+    outline_rect = restart_frame_rect.inflate(1, 1)
+    pygame.draw.rect(screen,'#9A6735', restart_frame_rect, 0, 10)
+    pygame.draw.rect(screen,'Black', outline_rect, 2, 10)
+    screen.blit(restart_text, restart_rect)
+    return outline_rect
+
+def draw_score():
+    score_text = score_surf.render(str(score), True, 'White')
+    score_rect = score_text.get_rect(midtop=(400, 0))
+    outline_surf = score_surf.render(str(score), True, 'Black')
+    for ox, oy in [(-3, -3), (3, -3), (-3, 3), (3, 3), (0, -3), (0, 3), (-3, 0), (3, 0)]:
+        screen.blit(outline_surf, (score_rect.topleft[0] + ox, score_rect.topleft[1] + oy))
+    screen.blit(score_text, score_rect)
 
 running = True
 restart = False
@@ -64,20 +99,25 @@ while running:
             running = False
         if event.type == pygame.KEYDOWN     :
             bird_velocity = jump_strength
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if restart:
-                restart = False
-                bird_pos = 300
-                tunnel_pos1 = 700
-                tunnel_pos2 = 1000
-                tunnel_pos3 = 1300
-                tunnel_pos4 = 1600
+        if restart:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if restart_button.collidepoint(event.pos):
+                    restart_button = None
+                    restart = False
+                    bird_pos = 300
+                    bird_velocity = 0
+                    tunnel_pos1 = 700
+                    tunnel_pos2 = 1000
+                    tunnel_pos3 = 1300
+                    tunnel_pos4 = 1600
+                    score = 0
     draw_background()
     br = draw_bird(bird_pos)
     tr1, tr2 = draw_tunnels(tunnel_pos1, gap1)
     tr3, tr4 = draw_tunnels(tunnel_pos2, gap2)
     tr5, tr6 = draw_tunnels(tunnel_pos3, gap3)
     tr7, tr8 = draw_tunnels(tunnel_pos4, gap4)
+    draw_score()
     ground_rect =pygame.Rect(0,620,800,170)
     if not restart:
         bird_velocity += gravity
@@ -86,25 +126,42 @@ while running:
         tunnel_pos2 -= 4
         tunnel_pos3 -= 4
         tunnel_pos4 -= 4
+        if 110 > tunnel_pos1 and not pass1:
+            pass1 = True
+            score += 1
+        if 110 > tunnel_pos2 and not pass2:
+            pass2 = True
+            score += 1
+        if 110 > tunnel_pos3 and not pass3:
+            pass3 = True
+            score += 1
+        if 110 > tunnel_pos4 and not pass4:
+            pass4 = True
+            score += 1
+
         if bird_pos <= 0:
             bird_pos = 0
             bird_velocity = 0
         if tunnel_pos1 < -100:
             tunnel_pos1 = tunnel_pos4 + 300
             gap1 = random.randint(200, 400)
+            pass1 = False
         if tunnel_pos2 < -100:
             tunnel_pos2 = tunnel_pos1 + 300
             gap2 = random.randint(200, 400)
+            pass2 = False
         if tunnel_pos3 < -100:
             tunnel_pos3 = tunnel_pos2 + 300
             gap3 = random.randint(200, 400)
+            pass3 = False
         if tunnel_pos4 < -100:
             tunnel_pos4 = tunnel_pos3 + 300
             gap4 = random.randint(200, 400)
+            pass4 = False
         if br.colliderect(ground_rect) or br.colliderect(tr1) or br.colliderect(tr2) or br.colliderect(tr3) or br.colliderect(tr4) or br.colliderect(tr5) or br.colliderect(tr6) or br.colliderect(tr7) or br.colliderect(tr8):
             restart = True
     if restart:
-        draw_game_over()
+        restart_button = draw_game_over()
     pygame.display.update()
     clock.tick(60)
 pygame.quit()
