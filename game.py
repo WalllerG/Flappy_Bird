@@ -28,7 +28,13 @@ pass3 = False
 pass4 = False
 restart_button = None
 
-background = pygame.transform.scale(pygame.image.load("images/background.png"), screen.get_size())
+starting_page_text = pygame.font.Font('game_font.ttf', 100)
+starting_page_surf = starting_page_text.render("FlappyBird", True, 'White')
+starting_page_rect = starting_page_surf.get_rect(center=(400,200))
+starting_page_outline = starting_page_text.render("FlappyBird", True, 'Black')
+starting_button_font = pygame.font.Font('game_font.ttf', 50)
+
+background = pygame.transform.scale(pygame.image.load("images/background.png").convert_alpha(), screen.get_size())
 
 bird_surface = pygame.image.load("images/bird.png").convert_alpha()
 bird = pygame.transform.scale(bird_surface, (60,60))
@@ -41,6 +47,23 @@ score_surf = pygame.font.Font('score_font.ttf', 66)
 game_over = pygame.font.Font('game_font.ttf', 80)
 game_over_text = game_over.render("GAME OVER", True, (245, 160, 80))
 game_over_rect = game_over_text.get_rect(center=(400, 230))
+
+def draw_starting_page():
+    screen.blit(background, (0, 0))
+    for ox, oy in [(-3, -3), (3, -3), (-3, 3), (3, 3), (0, -3), (0, 3), (-3, 0), (3, 0)]:
+        screen.blit(starting_page_outline, (starting_page_rect.topleft[0] + ox, starting_page_rect.topleft[1] + oy))
+    screen.blit(starting_page_surf, starting_page_rect)
+    new_bird = pygame.transform.scale(bird_surface, (100, 100))
+    bird_rect = new_bird.get_rect(center=(starting_page_rect.center[0]-10,starting_page_rect.center[1] + 150))
+    screen.blit(new_bird, bird_rect)
+    starting_button = starting_button_font.render("START", True, 'Darkgreen')
+    starting_button_rect = starting_button.get_rect(center = (starting_page_rect.center[0],starting_page_rect.center[1] + 300))
+    start_button_frame = starting_button_rect.inflate(100,40)
+    frame_outline = start_button_frame.inflate(1,1)
+    pygame.draw.rect(screen, 'White', start_button_frame, 0, 20)
+    pygame.draw.rect(screen, 'Black', frame_outline, 3, 20)
+    screen.blit(starting_button, starting_button_rect)
+    return frame_outline
 
 def draw_background():
     screen.blit(background, (0,0))
@@ -96,6 +119,9 @@ def draw_score():
 
 running = True
 restart = False
+game_active = False
+start_game = None
+
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -114,57 +140,64 @@ while running:
                     tunnel_pos3 = 1300
                     tunnel_pos4 = 1600
                     score = 0
-    draw_background()
-    br = draw_bird(bird_pos)
-    tr1, tr2 = draw_tunnels(tunnel_pos1, gap1)
-    tr3, tr4 = draw_tunnels(tunnel_pos2, gap2)
-    tr5, tr6 = draw_tunnels(tunnel_pos3, gap3)
-    tr7, tr8 = draw_tunnels(tunnel_pos4, gap4)
-    draw_score()
-    ground_rect =pygame.Rect(0,620,800,170)
-    if not restart:
-        bird_velocity += gravity
-        bird_pos += bird_velocity
-        tunnel_pos1 -= 4
-        tunnel_pos2 -= 4
-        tunnel_pos3 -= 4
-        tunnel_pos4 -= 4
-        if 110 > tunnel_pos1 and not pass1:
-            pass1 = True
-            score += 1
-        if 110 > tunnel_pos2 and not pass2:
-            pass2 = True
-            score += 1
-        if 110 > tunnel_pos3 and not pass3:
-            pass3 = True
-            score += 1
-        if 110 > tunnel_pos4 and not pass4:
-            pass4 = True
-            score += 1
+        if not game_active:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if start_game.collidepoint(event.pos):
+                    game_active = True
+    if not game_active:
+        start_game = draw_starting_page()
+    if game_active:
+        draw_background()
+        br = draw_bird(bird_pos)
+        tr1, tr2 = draw_tunnels(tunnel_pos1, gap1)
+        tr3, tr4 = draw_tunnels(tunnel_pos2, gap2)
+        tr5, tr6 = draw_tunnels(tunnel_pos3, gap3)
+        tr7, tr8 = draw_tunnels(tunnel_pos4, gap4)
+        draw_score()
+        ground_rect =pygame.Rect(0,620,800,170)
+        if not restart:
+            bird_velocity += gravity
+            bird_pos += bird_velocity
+            tunnel_pos1 -= 4
+            tunnel_pos2 -= 4
+            tunnel_pos3 -= 4
+            tunnel_pos4 -= 4
+            if 110 > tunnel_pos1 and not pass1:
+                pass1 = True
+                score += 1
+            if 110 > tunnel_pos2 and not pass2:
+                pass2 = True
+                score += 1
+            if 110 > tunnel_pos3 and not pass3:
+                pass3 = True
+                score += 1
+            if 110 > tunnel_pos4 and not pass4:
+                pass4 = True
+                score += 1
 
-        if bird_pos <= 0:
-            bird_pos = 0
-            bird_velocity = 0
-        if tunnel_pos1 < -100:
-            tunnel_pos1 = tunnel_pos4 + 300
-            gap1 = random.randint(200, 400)
-            pass1 = False
-        if tunnel_pos2 < -100:
-            tunnel_pos2 = tunnel_pos1 + 300
-            gap2 = random.randint(200, 400)
-            pass2 = False
-        if tunnel_pos3 < -100:
-            tunnel_pos3 = tunnel_pos2 + 300
-            gap3 = random.randint(200, 400)
-            pass3 = False
-        if tunnel_pos4 < -100:
-            tunnel_pos4 = tunnel_pos3 + 300
-            gap4 = random.randint(200, 400)
-            pass4 = False
-        if br.colliderect(ground_rect) or br.colliderect(tr1) or br.colliderect(tr2) or br.colliderect(tr3) or br.colliderect(tr4) or br.colliderect(tr5) or br.colliderect(tr6) or br.colliderect(tr7) or br.colliderect(tr8):
-            restart = True
-    if restart:
-        restart_button = draw_game_over()
+            if bird_pos <= 0:
+                bird_pos = 0
+                bird_velocity = 0
+            if tunnel_pos1 < -100:
+                tunnel_pos1 = tunnel_pos4 + 300
+                gap1 = random.randint(200, 400)
+                pass1 = False
+            if tunnel_pos2 < -100:
+                tunnel_pos2 = tunnel_pos1 + 300
+                gap2 = random.randint(200, 400)
+                pass2 = False
+            if tunnel_pos3 < -100:
+                tunnel_pos3 = tunnel_pos2 + 300
+                gap3 = random.randint(200, 400)
+                pass3 = False
+            if tunnel_pos4 < -100:
+                tunnel_pos4 = tunnel_pos3 + 300
+                gap4 = random.randint(200, 400)
+                pass4 = False
+            if br.colliderect(ground_rect) or br.colliderect(tr1) or br.colliderect(tr2) or br.colliderect(tr3) or br.colliderect(tr4) or br.colliderect(tr5) or br.colliderect(tr6) or br.colliderect(tr7) or br.colliderect(tr8):
+                restart = True
+        if restart:
+            restart_button = draw_game_over()
     pygame.display.update()
     clock.tick(60)
 pygame.quit()
