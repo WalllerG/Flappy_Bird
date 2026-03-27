@@ -24,11 +24,14 @@ gap4 = random.randint(200, 400)
 COLOR_SHADOW = (180, 100, 40)
 COLOR_OUTLINE = (255, 255, 255)
 score = 0
+crash_time = 0
 pass1 = False
 pass2 = False
 pass3 = False
 pass4 = False
 restart_button = None
+falling = False
+waiting = False
 
 starting_page_text = pygame.font.Font('game_font.ttf', 100)
 starting_page_surf = starting_page_text.render("FlappyBird", True, 'White')
@@ -126,14 +129,17 @@ game_active = False
 start_game = None
 
 while running:
+    current_time = pygame.time.get_ticks()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        if event.type == pygame.KEYDOWN     :
+        if event.type == pygame.KEYDOWN and not falling:
             bird_velocity = jump_strength
         if restart:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if restart_button.collidepoint(event.pos):
+                    waiting = False
+                    falling = False
                     restart_button = None
                     restart = False
                     bird_pos = 300
@@ -161,7 +167,7 @@ while running:
         tr7, tr8 = draw_tunnels(tunnel_pos4, gap4)
         draw_score()
         ground_rect =pygame.Rect(0,620,800,170)
-        if not restart:
+        if not falling:
             bird_velocity += gravity
             bird_pos += bird_velocity
             tunnel_pos1 -= 4
@@ -201,6 +207,17 @@ while running:
                 gap4 = random.randint(200, 400)
                 pass4 = False
             if br.colliderect(ground_rect) or br.colliderect(tr1) or br.colliderect(tr2) or br.colliderect(tr3) or br.colliderect(tr4) or br.colliderect(tr5) or br.colliderect(tr6) or br.colliderect(tr7) or br.colliderect(tr8):
+                falling = True
+        if falling and not restart:
+            br = draw_bird(bird_pos)
+            if not waiting:
+                waiting = True
+                crash_time = pygame.time.get_ticks()
+            if waiting:
+                if current_time - crash_time >= 100:
+                    bird_velocity += gravity
+                    bird_pos += bird_velocity
+            if bird_pos > screen.get_height():
                 restart = True
         if restart:
             restart_button = draw_game_over()
