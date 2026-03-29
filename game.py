@@ -227,7 +227,7 @@ while running:
                 if current_time - crash_time >= 100:
                     bird_velocity += gravity
                     bird_pos += bird_velocity
-            if bird_pos > 400:
+            if bird_pos > 630:
                 die_sound.play()
             if bird_pos > screen.get_height():
                 restart = True
