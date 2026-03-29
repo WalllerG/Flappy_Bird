@@ -33,6 +33,12 @@ restart_button = None
 falling = False
 waiting = False
 
+background_music = pygame.mixer.Sound('music/background_music.mp3')
+background_music.set_volume(0.5)
+jump_sound = pygame.mixer.Sound('music/jump.mp3')
+hit_sound = pygame.mixer.Sound('music/hit.mp3')
+die_sound = pygame.mixer.Sound('music/die.mp3')
+
 starting_page_text = pygame.font.Font('game_font.ttf', 100)
 starting_page_surf = starting_page_text.render("FlappyBird", True, 'White')
 starting_page_rect = starting_page_surf.get_rect(center=(400,200))
@@ -134,6 +140,7 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.KEYDOWN and not falling:
+            jump_sound.play()
             bird_velocity = jump_strength
         if restart:
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -154,11 +161,13 @@ while running:
                 if start_game.collidepoint(event.pos):
                     game_active = True
     if not game_active:
+        background_music.play()
         scroll -= scroll_speed
         if abs(scroll) > background.get_width():
             scroll = 0
         start_game = draw_starting_page(scroll)
     if game_active:
+        background_music.stop()
         draw_background()
         br = draw_bird(bird_pos)
         tr1, tr2 = draw_tunnels(tunnel_pos1, gap1)
@@ -207,6 +216,7 @@ while running:
                 gap4 = random.randint(200, 400)
                 pass4 = False
             if br.colliderect(ground_rect) or br.colliderect(tr1) or br.colliderect(tr2) or br.colliderect(tr3) or br.colliderect(tr4) or br.colliderect(tr5) or br.colliderect(tr6) or br.colliderect(tr7) or br.colliderect(tr8):
+                hit_sound.play()
                 falling = True
         if falling and not restart:
             br = draw_bird(bird_pos)
@@ -217,6 +227,8 @@ while running:
                 if current_time - crash_time >= 100:
                     bird_velocity += gravity
                     bird_pos += bird_velocity
+            if bird_pos > 400:
+                die_sound.play()
             if bird_pos > screen.get_height():
                 restart = True
         if restart:
