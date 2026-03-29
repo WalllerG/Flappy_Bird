@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1a9a2818-b03b-421c-a29f-1038ca1ced5e" name="Changes" comment="" />
+    <list default="true" id="1a9a2818-b03b-421c-a29f-1038ca1ced5e" name="Changes" comment="delete image" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -26,12 +26,12 @@
     &quot;assignee&quot;: &quot;WalllerG&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/WalllerG/Flappy_Bird.git&quot;,
-    &quot;accountId&quot;: &quot;01935393-575d-4859-8727-8a5f92406d19&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/WalllerG/Flappy_Bird.git",
+    "accountId": "0ef02d19-ac93-4acc-8044-cf886f39d998"
   }
-}</component>
+}]]></component>
   <component name="McpProjectServerCommands">
     <commands />
     <urls />
@@ -116,7 +116,15 @@
       <option name="project" value="LOCAL" />
       <updated>1774550826985</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="delete image">
+      <option name="closed" value="true" />
+      <created>1774709251994</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1774709251994</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -124,6 +132,7 @@
     <MESSAGE value="small fix" />
     <MESSAGE value="add starting page and starting game button feature" />
     <MESSAGE value="add background moving on starting page features" />
-    <option name="LAST_COMMIT_MESSAGE" value="add background moving on starting page features" />
+    <MESSAGE value="delete image" />
+    <option name="LAST_COMMIT_MESSAGE" value="delete image" />
   </component>
 </project>
